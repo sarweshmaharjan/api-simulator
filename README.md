@@ -40,6 +40,15 @@ List any prerequisites or dependencies required to run your project. Include lin
    cd api-simulator
    ```
 
+2. Start the project
+
+```sh
+make create # to build the project
+make run build # to start the project
+make remove # to remove the image
+make clean # to remove everything about the build
+```
+
 ### Project Structure
 
 - cmd/ # Application entry point
