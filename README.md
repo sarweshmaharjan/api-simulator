@@ -43,11 +43,11 @@ List any prerequisites or dependencies required to run your project. Include lin
 2. Start the project
 
 ```sh
-make create # to build the project
-make run build # to start the project
-make remove # to remove the image
-make clean # to remove everything about the build
+make run
 ```
+
+3. Go to PHIL Local DB and set
+- key: "truepill.apiUrl" to "http://localhost:9990"
 
 ### Project Structure
 
