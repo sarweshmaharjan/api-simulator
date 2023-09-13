@@ -7,5 +7,5 @@ RUN CGO_ENABLED=0 go install -ldflags "-s -w -extldflags '-static'" github.com/g
 
 RUN go mod download
 ENV GO111MODULE=on
-RUN CGO_ENABLED=0 go build -gcflags "all=-N -l" -o . ./cmd/main.go
+RUN CGO_ENABLED=0 go build -gcflags "all=-N -l" -o ./cmd ./cmd/main.go
 

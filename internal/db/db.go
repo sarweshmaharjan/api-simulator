@@ -2,8 +2,6 @@ package connection
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -13,21 +11,45 @@ type MyDB struct {
 }
 
 func PrimayConnection() *sql.DB {
-	user := "admin"
-	password := "admin"
-	dbname := "simulator"
-	host := "localhost"
-	port := 5432
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=disable", user, password, dbname, host, port)
+	connStr := "postgres://admin:admin@localhost:5432/simulator?sslmode=disable"
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return db
 }
 
-func (db MyDB) Save(query string) {
-	defer db.Close()
-	db.Exec(query)
+func Init(db *sql.DB) error {
+
+	existQuery := `
+	SELECT EXISTS (
+		SELECT FROM
+			information_schema.tables
+		WHERE
+			table_schema = 'api_simulator_v1' AND
+			table_name   = 'simulator_responses'
+	);`
+	var exists bool
+	err := db.QueryRow(existQuery).Scan(&exists)
+	if err != nil {
+		panic(err)
+	}
+
+	if !exists {
+		createTableSQL := `
+		CREATE SCHEMA IF NOT EXISTS api_simulator_v1;
+		CREATE TABLE api_simulator_v1.simulator_responses (
+			id serial primary key,
+			response json,
+			created_at timestamp not null default NOW()
+		);
+		`
+		_, err := db.Exec(createTableSQL)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return nil
 }
