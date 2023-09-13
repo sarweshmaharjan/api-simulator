@@ -47,7 +47,8 @@ make run
 ```
 
 3. Go to PHIL Local DB and set
-- key: "truepill.apiUrl" to "http://localhost:9990"
+
+- key: "truepill.apiUrl" to "http://localhost:9999"
 
 ### Project Structure
 
