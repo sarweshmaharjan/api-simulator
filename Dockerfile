@@ -1,21 +1,11 @@
-# Use an official Go runtime as a parent image
-FROM golang:1.20
-
-# Set the working directory inside the container
+FROM golang:1.20-alpine
+EXPOSE 9999 9990
 WORKDIR /app
-
-# Copy the current directory contents into the container at /app
-COPY . .
-
-# Copy the .env file from the ./cmd/ directory to /app/
+COPY . ./
 COPY ./cmd/.env ./.env
+RUN CGO_ENABLED=0 go install -ldflags "-s -w -extldflags '-static'" github.com/go-delve/delve/cmd/dlv@latest
 
-# Build the Go application
 RUN go mod download
-RUN go build -o api_response_simulation ./cmd/main.go
+ENV GO111MODULE=on
+RUN CGO_ENABLED=0 go build -gcflags "all=-N -l" -o . ./cmd/main.go
 
-# Expose the port your application will run on
-EXPOSE 9999
-
-# Run your application when the container starts, listening on 0.0.0.0
-CMD ["./api_response_simulation"]

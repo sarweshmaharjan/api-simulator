@@ -1,31 +1,64 @@
 package api
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	partner "github.com/sarweshmaharjan/api-simulator.git/data"
+	connection "github.com/sarweshmaharjan/api-simulator.git/internal/db"
 )
 
-type DirectTransferResponse struct {
-	RequestID string                 `json:"request_id" bson:"requestId"`
-	Status    string                 `json:"status" bson:"status"`
-	TimeStamp float64                `json:"timestamp" bson:"timestamp"`
-	Details   *DirectTransferDetails `json:"details" bson:"details"`
-}
-
-type DirectTransferDetails struct {
-	DirectTransferID string `json:"direct_transfer_id" bson:"directTransferId"`
-}
-
 func GetDirectTransfer(ctx *gin.Context) {
-	directTransfer := DirectTransferResponse{
-		RequestID: "5a9a79a446f5d554",
-		Status:    "success",
-		TimeStamp: float64(time.Now().Unix()),
-		Details: &DirectTransferDetails{
-			DirectTransferID: "c8a73a55dc",
-		},
+	directTransfer := partner.GetDirectTransfer()
+	sql := connection.PrimayConnection()
+
+	exists, err := tableExists(sql, "simulator")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	if !exists {
+		// Create the "simulator" table with a "response" column of type JSON
+		createTableSQL := `
+			CREATE TABLE simulator (
+				id SERIAL PRIMARY KEY,
+				response JSON
+			);
+		`
+		_, err := sql.Exec(createTableSQL)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// Insert a JSON value into the "simulator" table
+	insertSQL := `
+		INSERT INTO simulator (response) VALUES ($1);
+	`
+	responseJSON := `{"key": "value"}`
+	_, err = sql.Exec(insertSQL, responseJSON)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ctx.JSON(http.StatusCreated, directTransfer)
+}
+
+// tableExists checks if a table with the given name exists in the database.
+func tableExists(db *sql.DB, tableName string) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM information_schema.tables
+			WHERE table_name = $1
+		);
+	`
+	var exists bool
+	err := db.QueryRow(query, tableName).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

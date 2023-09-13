@@ -1,0 +1,46 @@
+version: "3"
+services:
+  # Go application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9999:9999"
+      - "9990:9990"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: simulator
+    depends_on:
+      - db
+    volumes:
+      - ./cmd:/app/cmd
+    command:
+      [
+        "/go/bin/dlv",
+        "exec",
+        "./main",
+        "--listen=:9990",
+        "--headless=true",
+        "--log=true",
+        "--accept-multiclient",
+        "--api-version=2",
+      ]
+
+  # PostgreSQL service
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: simulator
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:

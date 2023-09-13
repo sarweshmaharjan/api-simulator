@@ -9,6 +9,16 @@
       "program": "${workspaceFolder}/cmd/main.go",
       "env": {},
       "args": []
+    },
+    {
+      "name": "Attach to Docker-Compose",
+      "type": "go",
+      "request": "attach",
+      "mode": "remote",
+      "remotePath": "/app",
+      "port": 9990,
+      "host": "localhost",
+      "trace": "verbose"
     }
   ]
 }
