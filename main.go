@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sarweshmaharjan/api-simulator.git/api"
 	"github.com/sarweshmaharjan/api-simulator.git/config"
 )
 
@@ -18,7 +19,7 @@ func main() {
 	fmt.Printf("Port: %s\n", cfg.Port)
 
 	router := gin.Default()
-	router.Routes()
+	api.Routes(router)
 	uri := fmt.Sprintf("%s:%s", cfg.APIURL, cfg.Port)
 	router.Run(uri)
 }

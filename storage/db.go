@@ -28,7 +28,7 @@ func Init(db *sql.DB) error {
 			information_schema.tables
 		WHERE
 			table_schema = 'api_simulator_v1' AND
-			table_name   = 'simulator_responses'
+			table_name   = 'direct_transfer_response'
 	);`
 	var exists bool
 	err := db.QueryRow(existQuery).Scan(&exists)
@@ -39,10 +39,12 @@ func Init(db *sql.DB) error {
 	if !exists {
 		createTableSQL := `
 		CREATE SCHEMA IF NOT EXISTS api_simulator_v1;
-		CREATE TABLE api_simulator_v1.simulator_responses (
+		CREATE TABLE api_simulator_v1.direct_transfer_response (
 			id serial primary key,
-			response json,
-			created_at timestamp not null default NOW()
+			createdAt timestamp not null default NOW(),
+			requestId varchar(255),
+			status varchar(50),
+			detailsTransferId varchar(255)
 		);
 		`
 		_, err := db.Exec(createTableSQL)
