@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	RequestID                 = "5a9a79a446f5d55421"
-	PrescriptionToken         = "z3q2jrs31"
-	PatientToken              = "4526d90a1"
-	InsuranceToken            = "skhsyq83rkd3uht91"
-	DirectTransferID          = "c8a73a55dc1"
-	TransferPrescriptionToken = "z3q2jr231"
-	DirectTransferToken       = "dff0a981241"
-	CopayPrescriptionToken    = "an7hj7gp63yjhgpw1"
-	CopayRequestToken         = "ef6p8y6wz7x3hpng1"
+	RequestID                 = "5a9a79a446f5d554212346"
+	PrescriptionToken         = "z3q2jrs312356"
+	PatientToken              = "4526d90a12356"
+	InsuranceToken            = "skhsyq83rkd3uht691235"
+	DirectTransferID          = "c8a73a55dc61325"
+	TransferPrescriptionToken = "z3q2jr2312365"
+	DirectTransferToken       = "dff0a9812412635"
+	CopayPrescriptionToken    = "an7hj7gp63yjh6gpw1235"
+	CopayRequestToken         = "ef6p8y6wz7x3hp6ng1235"
 )
 
 func GetDirectTransfer(ctx *gin.Context) {
@@ -45,9 +45,11 @@ func GetDirectTransfer(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, directTransfer)
-	SendNotifyRxWebhook(ctx)
-	time.Sleep(5 * time.Second)
-	SendDirectTransferWebhook(ctx)
+	go func() {
+		SendNotifyRxWebhook(ctx)
+		time.Sleep(5 * time.Second)
+		SendDirectTransferWebhook(ctx)
+	}()
 }
 
 func SendNotifyRxWebhook(ctx *gin.Context) {
@@ -102,7 +104,7 @@ func SendDirectTransferWebhook(ctx *gin.Context) {
 		"direct_transfer_token": notifyRx.DirectTransferToken,
 	}
 	callbackResponse := &types.CallbackRequest{
-		RequestID:    "5a9a79a446f5d554",
+		RequestID:    RequestID,
 		Status:       "success",
 		Timestamp:    float64(time.Now().Unix()),
 		CallbackType: "DIRECT_TRANSFER",
@@ -211,7 +213,7 @@ func GetCopayRequest(ctx *gin.Context) {
 // func SendCopayWebhook(ctx *gin.Context) {
 // 	copayCallback := ""
 // 	callbackResponse := &types.CallbackRequest{
-// 		RequestID:    "5a9a79a446f5d554",
+// 		RequestID:    RequestID,
 // 		Status:       "success",
 // 		Timestamp:    float64(time.Now().Unix()),
 // 		CallbackType: "COPAY",
