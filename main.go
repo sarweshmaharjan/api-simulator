@@ -5,8 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sarweshmaharjan/api-simulator.git/internal/api"
-	"github.com/sarweshmaharjan/api-simulator.git/internal/config"
+	"github.com/sarweshmaharjan/api-simulator.git/config"
 )
 
 func main() {
@@ -19,7 +18,7 @@ func main() {
 	fmt.Printf("Port: %s\n", cfg.Port)
 
 	router := gin.Default()
-	router.POST("/v1/direct_transfer", api.GetDirectTransfer)
+	router.Routes()
 	uri := fmt.Sprintf("%s:%s", cfg.APIURL, cfg.Port)
 	router.Run(uri)
 }
