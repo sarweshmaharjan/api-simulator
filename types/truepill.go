@@ -55,7 +55,7 @@ type Prescription struct {
 	ExpirationDate         string             `json:"expiration_date" bson:"expirationDate"`
 	RefillsRemaining       int                `json:"refills_remaining" bson:"refillsRemaining"`
 	QuantityRemaining      int                `json:"quantity_remaining" bson:"quantityRemaining"`
-	IsRefill               int               `json:"is_refill" bson:"isRefill"`
+	IsRefill               int                `json:"is_refill" bson:"isRefill"`
 	LastFilledDate         string             `json:"last_filled_date" bson:"lastFilledDate"`
 	DateFilledUTC          string             `json:"date_filled_utc" bson:"dateFilledUTC"`
 	NumberOfRefillsAllowed int                `json:"number_of_refills_allowed" bson:"numberOfRefillsAllowed"`
@@ -96,6 +96,7 @@ type InsuranceResponse struct {
 	TimeStamp float64           `json:"timestamp" bson:"timestamp"`
 	Details   *InsuranceDetails `json:"details" bson:"details"`
 }
+
 // InsuranceDetails represents the data structure for response details for create insurance from truepill
 type InsuranceDetails struct {
 	InsuranceToken string `json:"insurance_token" bson:"insuranceToken"`
@@ -118,4 +119,39 @@ type CopayRequestPrescriptionToken struct {
 	PrescriptionToken      string `json:"prescription_token" bson:"prescriptionToken"`
 	CopayPrescriptionToken string `json:"copay_request_prescription_token" bson:"copayRequestPrescriptionToken"`
 	Status                 string `json:"status" bson:"status"`
+}
+
+type CopayWebhook struct {
+	Prescription *[]CopayRequest `json:"prescription_token" bson:"prescriptionToken"`
+	PatientToken string          `json:"patient_token" bson:"patientToken"`
+	Metadata     string          `json:"metadata" bson:"metadata"`
+	Message      string          `json:"message" bson:"message"`
+}
+
+type CopayRequest struct {
+	PrescriptionToken             string       `json:"prescription_token" bson:"prescriptionToken"`
+	InsuranceToken                string       `json:"insurance_token" bson:"insuranceToken"`
+	Status                        string       `json:"status" bson:"status"`
+	NextFillDate                  string       `json:"next_fill_date,omitempty" bson:"nextFillDate,omitempty"`
+	CopayAmount                   string       `json:"copay_amount" bson:"copayAmount"`
+	CopayRequestPrescriptionToken string       `json:"copay_request_prescription_token" bson:"copayRequestPrescriptionToken"`
+	DaysSupply                    string       `json:"days_supply" bson:"daysSupply"`
+	Quantity                      int          `json:"quantity" bson:"quantity"`
+	FillNumber                    int          `json:"fill_number" bson:"fillNumber"`
+	ErrorCode                     string       `json:"error_code" bson:"errorCode"`
+	ClaimRejectCodes              []RejectCode `json:"claim_reject_codes" bson:"claimRejectCodes"`
+	Claims                        []Claim      `json:"claims" bson:"claims"`
+}
+
+type RejectCode struct {
+	Code    string `json:"code" bson:"code"`
+	Message string `json:"message" bson:"message"`
+}
+
+type Claim struct {
+	InsuranceToken   string       `json:"insurance_token" bson:"insuranceToken"`
+	BillingOrder     int          `json:"billing_order" bson:"billingOrder"`
+	Status           string       `json:"status" bson:"status"`
+	CopayAmount      string       `json:"copay_amount" bson:"copayAmount"`
+	ClaimRejectCodes []RejectCode `json:"claim_reject_codes" bson:"claimRejectCodes"`
 }

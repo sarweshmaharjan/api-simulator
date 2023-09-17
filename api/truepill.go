@@ -208,24 +208,104 @@ func GetCopayRequest(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, insuranceResponse)
+	go func() {
+		SendCopayWebhook(ctx)
+	}()
 }
 
-// func SendCopayWebhook(ctx *gin.Context) {
-// 	copayCallback := ""
-// 	callbackResponse := &types.CallbackRequest{
-// 		RequestID:    RequestID,
-// 		Status:       "success",
-// 		Timestamp:    float64(time.Now().Unix()),
-// 		CallbackType: "COPAY",
-// 		Details:      notifyRxMap,
-// 	}
+func SendCopayWebhook(ctx *gin.Context) {
+	copayCallback := &types.CopayWebhook{
+		PatientToken: PatientToken,
+		Metadata:     TransferPrescriptionToken,
+		Message:      "Direct Transfer Accepted.",
+	}
 
-// 	webHookURL := "http://localhost:8888/api/v1/truepill/callback"
+	copayRxMap := map[string]interface{}{
+		"prescription": []map[string]interface{}{
+			{
+				"prescription_token":               PrescriptionToken,
+				"insurance_token":                  InsuranceToken,
+				"status":                           "completed",
+				"copay_request_prescription_token": CopayPrescriptionToken,
+				"next_fill_date":                   nil,
+				"copay_amount":                     "10",
+				"fill_number":                      1,
+				"days_supply":                      "30",
+				"quantity":                         30,
+				"claims": []map[string]interface{}{
+					{
+						"insurance_token": InsuranceToken,
+						"billing_order":   1,
+						"status":          "Paid",
+						"copay_amount":    "50",
+					},
+					{
+						"insurance_token": InsuranceToken,
+						"billing_order":   2,
+						"status":          "Paid",
+						"copay_amount":    "10",
+					},
+				},
+			},
+		},
+		"patient_token": copayCallback.PatientToken,
+		"metadata":      copayCallback.Metadata,
+		"message":       copayCallback.Message,
+	}
 
-// 	callbackJson := common.ToJSON(callbackResponse)
-// 	resp, err := http.Post(webHookURL, "application/json", bytes.NewBuffer(callbackJson))
-// 	if err != nil {
-// 		return
-// 	}
-// 	defer resp.Body.Close()
-// }
+	callbackResponse := &types.CallbackRequest{
+		RequestID:    RequestID,
+		Status:       "success",
+		Timestamp:    float64(time.Now().Unix()),
+		CallbackType: "COPAY",
+		Details:      copayRxMap,
+	}
+
+	webHookURL := "http://localhost:8888/api/v1/truepill/callback"
+
+	callbackJson := common.ToJSON(callbackResponse)
+	resp, err := http.Post(webHookURL, "application/json", bytes.NewBuffer(callbackJson))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+}
+
+func GetClaimsDetails(ctx *gin.Context) {
+	copayRxMap := []map[string]interface{}{
+		{
+			"patient_copay_amount": 2.42,
+			"transaction_code":     "B1",
+			"transaction_status":   "PAID",
+			"claim_type":           "BILLING",
+			"transmission_date":    "2023-07-16T12:41:30.000Z",
+			"insurance_type":       "PRIMARY",
+			"insurance": map[string]interface{}{
+				"group_number":  "RX881A",
+				"bin":           "17142",
+				"pcn":           nil,
+				"cardholder_id": "ABC123456",
+			},
+			"payor":                     "Health Partners",
+			"payor_adjudication_amount": 2.5,
+		},
+		{
+			"patient_copay_amount": 2.42,
+			"transaction_code":     "B2",
+			"transaction_status":   "APPROVED",
+			"claim_type":           "REVERSAL",
+			"transmission_date":    "2023-07-16T12:41:30.000Z",
+			"insurance_type":       "PRIMARY",
+			"insurance": map[string]interface{}{
+				"group":         "RX881A",
+				"bin":           "17142",
+				"pcn":           nil,
+				"cardholder_id": "ABC123456",
+			},
+			"payor":                     "Health Partners",
+			"payor_adjudication_amount": 2.5,
+		},
+	}
+
+	ctx.JSON(http.StatusCreated, copayRxMap)
+}
