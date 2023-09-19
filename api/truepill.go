@@ -13,15 +13,17 @@ import (
 )
 
 const (
-	RequestID                 = "5a9a79a446f5d554212346"
-	PrescriptionToken         = "z3q2jrs312356"
-	PatientToken              = "4526d90a12356"
-	InsuranceToken            = "skhsyq83rkd3uht691235"
-	DirectTransferID          = "c8a73a55dc61325"
-	TransferPrescriptionToken = "z3q2jr2312365"
-	DirectTransferToken       = "dff0a9812412635"
-	CopayPrescriptionToken    = "an7hj7gp63yjh6gpw1235"
-	CopayRequestToken         = "ef6p8y6wz7x3hp6ng1235"
+	RequestID                 = "5aca912a7g1491a446f5d554212346"
+	PrescriptionToken         = "z3acq212jrg1s1312356"
+	PatientToken              = "452ac6d1901g4a12356"
+	InsuranceToken            = "skhsacy21q83g1111rk4d3uht691235"
+	DirectTransferID          = "c8a73aca21554dgc61325"
+	TransferPrescriptionToken = "z3q2jrac22131g4211365"
+	DirectTransferToken       = "dff0a98ac12124g441112635"
+	CopayPrescriptionToken    = "an7hj7gpac62123gyj411h6gpw1235"
+	CopayRequestToken         = "ef6p8y6wzac7x123g4h11p6ng1235"
+	OrderToken                = "b392d"
+	MedicationToken           = "310ca0fa"
 )
 
 func GetDirectTransfer(ctx *gin.Context) {
@@ -308,4 +310,102 @@ func GetClaimsDetails(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, copayRxMap)
+}
+
+func GetFillRequest(ctx *gin.Context) {
+	insuranceResponse := &types.FillResponse{
+		RequestID: RequestID,
+		Status:    "success",
+		TimeStamp: float64(time.Now().Unix()),
+		Details: &types.FillDetails{
+			Message: "Your fill request has been processed successfully.",
+		},
+	}
+
+	ctx.JSON(http.StatusCreated, insuranceResponse)
+	go func() {
+		SendFillWebhook(ctx)
+		time.Sleep(5 * time.Second)
+		SendShippedWebhook(ctx)
+	}()
+}
+
+func SendFillWebhook(ctx *gin.Context) {
+	fillResp := &types.Order{
+		RequestID:       RequestID,
+		Status:          "success",
+		Timestamp:       1571251314,
+		RxID:            "",
+		PhilOrderNumber: "",
+		PhilOrderID:     "",
+		Details: &types.FillDetail{
+			Metadata:   TransferPrescriptionToken,
+			Message:    "Your fill request was processed and is pending shipment.",
+			DateFilled: "Mon, 01 Jun 2020 17:45:06 GMT",
+			OrderToken: OrderToken,
+			Medications: []*types.FillDetailMedication{
+				{
+					MedicationName:          "Metronidazole 500 mg oral tablet",
+					DispensedMedicationName: "Metronidazole 500 mg oral tablet",
+					RequestedMedicationName: "Metronidazole 500 mg oral tablet",
+					DaysSupply:              func() *float64 { v := float64(7); return &v }(),
+					Quantity:                14.0,
+					FillNumber:              "0",
+					RxNumber:                "1484947",
+					TotalRefillsAllowed:     3.0,
+					PrescriptionToken:       PrescriptionToken,
+					MedicationToken:         MedicationToken,
+					RemainingRefills: &types.RemainingRefills{
+						TotalRemainingRefills:  0.0,
+						TotalQuantityRemaining: 0.0,
+					},
+					PatientCopayAmount: 0.0,
+					PatientCashAmount:  0.0,
+				},
+			},
+			TrackingURL:  "https://tools.usps.com/go/TrackConfirmAction_input?origTrackNum=92001902453595000012688153",
+			ErrorCode:    "",
+			Description:  "",
+			PatientToken: "4526d90a",
+		},
+	}
+
+	webHookURL := "http://localhost:8888/api/v1/truepill/callback"
+
+	callbackJson := common.ToJSON(fillResp)
+	resp, err := http.Post(webHookURL, "application/json", bytes.NewBuffer(callbackJson))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+}
+
+func SendShippedWebhook(ctx *gin.Context) {
+
+	copayRxMap := map[string]interface{}{
+		"metadata":        TransferPrescriptionToken,
+		"status":          "DELIVERED",
+		"message":         "Your shipment has been delivered at the destination mailbox.",
+		"eta":             "2020-06-02T00:54:31.838Z",
+		"tracking_number": "43904456187100000000000000",
+		"tracking_url":    "https://tools.usps.com/go/TrackConfirmAction_input?origTrackNum=43904456187100000000000000",
+		"carrier":         "usps",
+	}
+
+	callbackResponse := &types.CallbackRequest{
+		RequestID:    RequestID,
+		Status:       "success",
+		Timestamp:    float64(time.Now().Unix()),
+		CallbackType: "SHIPMENT",
+		Details:      copayRxMap,
+	}
+
+	webHookURL := "http://localhost:8888/api/v1/truepill/callback"
+
+	callbackJson := common.ToJSON(callbackResponse)
+	resp, err := http.Post(webHookURL, "application/json", bytes.NewBuffer(callbackJson))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
 }

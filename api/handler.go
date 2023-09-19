@@ -8,4 +8,5 @@ func Routes(router *gin.Engine) {
 	router.GET("/v1/prescription/:prescription_token", GetPrescriptionDetails)
 	router.POST("/v1/insurance", GetInsuranceDetails)
 	router.POST("/v1/copay_request", GetCopayRequest)
+	router.POST("/v1/fill_request", GetFillRequest)
 }

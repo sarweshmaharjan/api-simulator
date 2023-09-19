@@ -155,3 +155,57 @@ type Claim struct {
 	CopayAmount      string       `json:"copay_amount" bson:"copayAmount"`
 	ClaimRejectCodes []RejectCode `json:"claim_reject_codes" bson:"claimRejectCodes"`
 }
+
+type FillResponse struct {
+	RequestID string       `json:"request_id" bson:"requestId"`
+	Status    string       `json:"status" bson:"status"`
+	TimeStamp float64      `json:"timestamp" bson:"timestamp"`
+	Details   *FillDetails `json:"details" bson:"details"`
+}
+
+type FillDetails struct {
+	Message string `json:"message" bson:"message"`
+}
+
+type Order struct {
+	RequestID       string      `json:"request_id" bson:"request_id"`
+	Status          string      `json:"status" bson:"status"`
+	Timestamp       float64     `json:"timestamp" bson:"timestamp"`
+	Details         *FillDetail `json:"details" bson:"details"`
+	RxID            string      `json:"rxId" bson:"rxId"`
+	PhilOrderNumber string      `json:"philOrderNumber" bson:"philOrderNumber"`
+	PhilOrderID     string      `json:"philOrderId" bson:"philOrderId"`
+}
+
+
+type FillDetail struct {
+	Metadata     string                  `json:"metadata" bson:"metadata"`
+	Message      string                  `json:"message" bson:"message"`
+	DateFilled   string                  `json:"date_filled" bson:"dateFilled"`
+	OrderToken   string                  `json:"order_token" bson:"OrderToken"`
+	Medications  []*FillDetailMedication `json:"medications" bson:"medications"`
+	TrackingURL  string                  `json:"tracking_url" bson:"trackingUrl"`
+	ErrorCode    string                  `json:"error_code,omitempty" bson:"error_code,omitempty"`
+	Description  string                  `json:"description,omitempty" bson:"description,omitempty"`
+	PatientToken string                  `json:"patient_token" bson:"PatientToken"`
+}
+
+type FillDetailMedication struct {
+	MedicationName          string            `json:"medication_name" bson:"medicationName"`
+	DispensedMedicationName string            `json:"dispensed_medication_name" bson:"dispensedMedicationName"`
+	RequestedMedicationName string            `json:"requested_medication_name" bson:"requestedMedicationName"`
+	DaysSupply              *float64          `json:"days_supply,omitempty" bson:"daysSupply"`
+	Quantity                float64           `json:"quantity" bson:"quantity"`
+	FillNumber              string            `json:"fill_number" bson:"fillNumber"`
+	RxNumber                string            `json:"rx_number" bson:"rxNumber"`
+	TotalRefillsAllowed     float64           `json:"total_refills_allowed" bson:"totalRefillsAllowed"`
+	PrescriptionToken       string            `json:"prescription_token" bson:"prescriptionToken"`
+	MedicationToken         string            `json:"medication_token" bson:"medicationToken"`
+	RemainingRefills        *RemainingRefills `json:"remaining_refills" bson:"remainingRefills"`
+	PatientCopayAmount      float64           `json:"patient_copay_amount" bson:"patientCopayAmount"`
+	PatientCashAmount       float64           `json:"patient_cash_amount" bson:"patientcashAmount"`
+}
+type RemainingRefills struct {
+	TotalRemainingRefills  float64 `json:"total_remaining_refills" bson:"totalRemainingRefills"`
+	TotalQuantityRemaining float64 `json:"total_quantity_remaining" bson:"totalQuantityRemaining"`
+}
