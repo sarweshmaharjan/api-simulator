@@ -49,6 +49,7 @@ make run
 3. Go to PHIL Local DB and set
 
 - key: "truepill.apiUrl" to "http://localhost:9999"
+- key: feature.IsCopayCallbackEnabled() needs to be set to true, such that copay callback can be saved.
 
 ### Project Structure
 

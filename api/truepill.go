@@ -221,7 +221,7 @@ func SendCopayWebhook(ctx *gin.Context) {
 	}
 
 	copayRxMap := map[string]interface{}{
-		"prescription": []map[string]interface{}{
+		"prescriptions": []map[string]interface{}{
 			{
 				"prescription_token":               PrescriptionToken,
 				"insurance_token":                  InsuranceToken,
