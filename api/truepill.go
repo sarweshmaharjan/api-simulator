@@ -211,7 +211,7 @@ func GetCopayRequest(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, insuranceResponse)
 	go func() {
-		SendCopayWebhook(ctx)
+		SendCopayRejectedWebhook(ctx)
 	}()
 }
 
@@ -246,6 +246,81 @@ func SendCopayWebhook(ctx *gin.Context) {
 						"billing_order":   2,
 						"status":          "Paid",
 						"copay_amount":    "10",
+					},
+				},
+			},
+		},
+		"patient_token": copayCallback.PatientToken,
+		"metadata":      copayCallback.Metadata,
+		"message":       copayCallback.Message,
+	}
+
+	callbackResponse := &types.CallbackRequest{
+		RequestID:    RequestID,
+		Status:       "success",
+		Timestamp:    float64(time.Now().Unix()),
+		CallbackType: "COPAY",
+		Details:      copayRxMap,
+	}
+
+	webHookURL := "http://localhost:8888/api/v1/truepill/callback"
+
+	callbackJson := common.ToJSON(callbackResponse)
+	resp, err := http.Post(webHookURL, "application/json", bytes.NewBuffer(callbackJson))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+}
+
+func SendCopayRejectedWebhook(ctx *gin.Context) {
+	copayCallback := &types.CopayWebhook{
+		PatientToken: PatientToken,
+		Metadata:     TransferPrescriptionToken,
+		Message:      "Direct Transfer Accepted.",
+	}
+
+	copayRxMap := map[string]interface{}{
+		"prescriptions": []map[string]interface{}{
+			{
+				"prescription_token":               PrescriptionToken,
+				"insurance_token":                  InsuranceToken,
+				"status":                           "completed",
+				"copay_request_prescription_token": CopayPrescriptionToken,
+				"next_fill_date":                   nil,
+				"copay_amount":                     "10",
+				"fill_number":                      1,
+				"days_supply":                      "30",
+				"quantity":                         30,
+				"claims": []map[string]interface{}{
+					{
+						"insurance_token": InsuranceToken,
+						"billing_order":   1,
+						"status":          "Rejected",
+						"claim_reject_codes": []map[string]interface{}{
+							{
+								"code":    "70",
+								"message": "Product/Service Not Covered - Plan/Benefit Exclusion",
+							}, {
+								"code":    "MR",
+								"message": "Product Not On Formulary",
+							},
+						},
+					},
+					{
+						"insurance_token": InsuranceToken,
+						"billing_order":   2,
+						"status":          "Paid",
+						"copay_amount":    "10",
+					},
+				},
+				"claim_reject_codes": []map[string]interface{}{
+					{
+						"code":    "70",
+						"message": "Product/Service Not Covered - Plan/Benefit Exclusion",
+					}, {
+						"code":    "MR",
+						"message": "Product Not On Formulary",
 					},
 				},
 			},
