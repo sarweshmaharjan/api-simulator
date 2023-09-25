@@ -65,6 +65,3 @@ help:
 	@echo "  tidy             Run 'go mod tidy'"
 	@echo "  update-go        Set Go version and run 'go mod tidy'"
 	@echo "  help             Display this help message (current target)"
-
-# Default target when 'make' is run without arguments
-default: help
