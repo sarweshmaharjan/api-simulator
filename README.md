@@ -1,6 +1,7 @@
 # API Simulator
 
-A simple application that will help in simulating response after external API System is hit.
+[![Status](https://img.shields.io/badge/Status-Progress-yellow.svg)](https://shields.io/)
+[![Version](https://img.shields.io/badge/Version-1.0-blue.svg)](https://shields.io/)
 
 ## Table of Contents
 
@@ -11,16 +12,10 @@ A simple application that will help in simulating response after external API Sy
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Introduction
 
-Simulating the API response.
-
-Features
-
-1. Add simulation to reponse in both success and failure.
-2. It enables continuous flow testing in local without breaking the application.
+The API simulator project replicates API integration responses, primarily Truepill and Thriftywhite. It is designed to expedite testing and debugging within our system.
 
 ## Getting Started
 
@@ -34,39 +29,48 @@ List any prerequisites or dependencies required to run your project. Include lin
 
    ```sh
    git clone git@github.com:sarweshmaharjan/api-simulator.git
-   ```
-
-   ```sh
    cd api-simulator
    ```
 
 2. Start the project
 
-```sh
-make run
-```
+   ```sh
+   make run #To create docker instance of postgres.
+   make update-go #To set up go version and install
+   ```
 
-3. Go to PHIL Local DB and set
+3. Configure CAPI:
 
-- key: "truepill.apiUrl" to "http://localhost:9999"
-- key: feature.IsCopayCallbackEnabled() needs to be set to true, such that copay callback can be saved.
+- Set "truepill.apiUrl" to "http://localhost:9999".
+- Ensure feature.IsCopayCallbackEnabled() is set to true for copay callback functionality.
 
 ### Project Structure
 
-- cmd/ # Application entry point
-- internal/ # Internal packages
-- pkg/ # Exported packages
-- test/ # Unit tests
-- data/ # Data files (if any)
-- go.mod # Go module file
-- go.sum # Go module checksum file
-- main.go # Main application file
-- README.md # This README file
+```sh
+├── adrs
+│   └── index.md
+├── api
+│   ├── handler.go
+│   └── truepill.go
+├── common
+│   └── common.go
+├── config
+│   └── config.go
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+├── go.sum
+├── main.go
+├── Makefile
+├── README.md
+├── storage
+│   └── db.go
+└── types
+    └── truepill.go
 
-### License
-
-This project is licensed under the License Name - see the LICENSE file for details.
+```
 
 ### Contributing
 
 - [Sarwesh Maharjan](https://github.com/sarweshmaharjan)
+- [Suman Shah](https://github.com/shahsuman438)
