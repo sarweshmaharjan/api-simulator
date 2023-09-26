@@ -175,8 +175,8 @@ type Order struct {
 	RxID            string      `json:"rxId" bson:"rxId"`
 	PhilOrderNumber string      `json:"philOrderNumber" bson:"philOrderNumber"`
 	PhilOrderID     string      `json:"philOrderId" bson:"philOrderId"`
+	CallbackType    string      `json:"callback_type" bson:"callbackType"`
 }
-
 
 type FillDetail struct {
 	Metadata     string                  `json:"metadata" bson:"metadata"`
