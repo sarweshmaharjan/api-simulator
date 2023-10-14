@@ -2,26 +2,31 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
+	"github.com/sarweshmaharjan/api-simulator.git/config"
 )
 
-type MyDB struct {
-	*sql.DB
-}
+var db *sql.DB
 
-func PrimayConnection() *sql.DB {
-	connStr := "postgres://admin:admin@localhost:5432/simulator?sslmode=disable"
+func OpenDBConnection() {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		config.Cfg.PostgresUser,
+		config.Cfg.PostgresPassword,
+		config.Cfg.PostgresHost,
+		config.Cfg.PostgresPort,
+		config.Cfg.PostgresDB,
+	)
 
-	db, err := sql.Open("postgres", connStr)
+	conn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
-	return db
+	db = conn
 }
 
-func Init(db *sql.DB) error {
-
+func Init() error {
 	existQuery := `
 	SELECT EXISTS (
 		SELECT FROM
@@ -53,5 +58,13 @@ func Init(db *sql.DB) error {
 		}
 	}
 
+	return nil
+}
+
+func ExecQuery(query string, args ...any) error {
+	_, err := db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
 	return nil
 }

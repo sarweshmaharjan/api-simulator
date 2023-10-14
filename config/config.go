@@ -1,28 +1,40 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
-type Config struct {
-	APIURL string
-	Port   string
+var Cfg config
+
+type config struct {
+	APIURL           string
+	Port             string
+	PostgresUser     string
+	PostgresPassword string
+	PostgresDB       string
+	PostgresHost     string
+	PostgresPort     string
 	// Add more configuration fields here
 }
 
-func LoadConfig() (*Config, error) {
+func LoadConfig() error {
 	err := godotenv.Load("config/.env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	config := &Config{
-		APIURL: os.Getenv("API_URL"),
-		Port:   os.Getenv("PORT"),
+	Cfg = config{
+		APIURL:           os.Getenv("API_URL"),
+		Port:             os.Getenv("PORT"),
+		PostgresUser:     os.Getenv("POSTGRES_USER"),
+		PostgresPassword: os.Getenv("POSTGRES_PASSWORD"),
+		PostgresDB:       os.Getenv("POSTGRES_DB"),
+		PostgresHost:     os.Getenv("POSTGRES_HOST"),
+		PostgresPort:     os.Getenv("POSTGRES_PORT"),
 		// Initialize other configuration fields here
 	}
-
-	return config, nil
+	return nil
 }
