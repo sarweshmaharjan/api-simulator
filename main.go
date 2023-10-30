@@ -7,19 +7,23 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sarweshmaharjan/api-simulator.git/api"
 	"github.com/sarweshmaharjan/api-simulator.git/config"
+	"github.com/sarweshmaharjan/api-simulator.git/storage"
 )
 
 func main() {
-	cfg, err := config.LoadConfig()
+	err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
 
-	fmt.Printf("API URL: %s\n", cfg.APIURL)
-	fmt.Printf("Port: %s\n", cfg.Port)
+	// Setup database connection
+	storage.OpenDBConnection()
+
+	fmt.Printf("API URL: %s\n", config.Cfg.APIURL)
+	fmt.Printf("Port: %s\n", config.Cfg.Port)
 
 	router := gin.Default()
 	api.Routes(router)
-	uri := fmt.Sprintf("%s:%s", cfg.APIURL, cfg.Port)
+	uri := fmt.Sprintf("%s:%s", config.Cfg.APIURL, config.Cfg.Port)
 	router.Run(uri)
 }

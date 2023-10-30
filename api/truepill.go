@@ -35,13 +35,14 @@ func GetDirectTransfer(ctx *gin.Context) {
 			DirectTransferID: DirectTransferID,
 		},
 	}
-	sql := storage.PrimayConnection()
-	storage.Init(sql)
+
+	storage.Init()
+
 	// Insert a JSON value into the "simulator" table
 	insertSQL := `
 		INSERT INTO api_simulator_v1.direct_transfer_response (requestId,status,detailsTransferId) VALUES ($1,$2,$3);
 	`
-	_, err := sql.Exec(insertSQL, directTransfer.RequestID, directTransfer.Status, directTransfer.Details.DirectTransferID)
+	err := storage.ExecQuery(insertSQL, directTransfer.RequestID, directTransfer.Status, directTransfer.Details.DirectTransferID)
 	if err != nil {
 		log.Fatal(err)
 	}
