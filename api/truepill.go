@@ -7,26 +7,42 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sarweshmaharjan/api-simulator.git/common"
 	"github.com/sarweshmaharjan/api-simulator.git/storage"
 	"github.com/sarweshmaharjan/api-simulator.git/types"
 )
 
-const (
-	RequestID                 = "5aca912a7g1491a446f5d554212346"
-	PrescriptionToken         = "z3acq212jrg1s1312356"
-	PatientToken              = "452ac6d1901g4a12356"
-	InsuranceToken            = "skhsacy21q83g1111rk4d3uht691235"
-	DirectTransferID          = "c8a73aca21554dgc61325"
-	TransferPrescriptionToken = "z3q2jrac22131g4211365"
-	DirectTransferToken       = "dff0a98ac12124g441112635"
-	CopayPrescriptionToken    = "an7hj7gpac62123gyj411h6gpw1235"
-	CopayRequestToken         = "ef6p8y6wzac7x123g4h11p6ng1235"
-	OrderToken                = "b392d"
-	MedicationToken           = "310ca0fa"
+var (
+	RequestID                 string
+	PrescriptionToken         string
+	InsuranceToken            string
+	DirectTransferID          string
+	PatientToken              string
+	TransferPrescriptionToken string
+	DirectTransferToken       string
+	CopayPrescriptionToken    string
+	CopayRequestToken         string
+	OrderToken                string
+	MedicationToken           string
 )
 
+func Init() {
+	RequestID = generateKey()
+	PrescriptionToken = generateKey()
+	PatientToken = generateKey()
+	InsuranceToken = generateKey()
+	DirectTransferID = generateKey()
+	TransferPrescriptionToken = generateKey()
+	DirectTransferToken = generateKey()
+	CopayPrescriptionToken = generateKey()
+	CopayRequestToken = generateKey()
+	OrderToken = generateKey()
+	MedicationToken = generateKey()
+}
+
 func GetDirectTransfer(ctx *gin.Context) {
+	Init()
 	directTransfer := &types.DirectTransferResponse{
 		RequestID: RequestID,
 		Status:    "success",
@@ -212,7 +228,8 @@ func GetCopayRequest(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, insuranceResponse)
 	go func() {
-		SendCopayRejectedWebhook(ctx)
+		time.Sleep(10 * time.Second)
+		SendCopayWebhook(ctx)
 	}()
 }
 
@@ -411,6 +428,7 @@ func SendFillWebhook(ctx *gin.Context) {
 		RequestID:       RequestID,
 		Status:          "success",
 		Timestamp:       1571251314,
+		CallbackType:    "ORDER",
 		RxID:            "",
 		PhilOrderNumber: "",
 		PhilOrderID:     "",
@@ -484,4 +502,12 @@ func SendShippedWebhook(ctx *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
+}
+
+func generateKey() string {
+	u, err := uuid.NewRandom()
+	if err != nil {
+		return ""
+	}
+	return u.String()
 }
